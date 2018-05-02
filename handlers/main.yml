@@ -1,0 +1,6 @@
+---
+- name: SSH daemon restart for security
+  service:
+    name: sshd
+    state: restarted
+  become: true

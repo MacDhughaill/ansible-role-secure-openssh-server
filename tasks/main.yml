@@ -1,0 +1,3 @@
+---
+- name: Secure SSH servers
+  import_tasks: secure_ssh.yml
