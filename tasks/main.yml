@@ -1,3 +1,23 @@
 ---
-- name: Secure SSH servers
-  import_tasks: secure_ssh.yml
+- name: Copy over the authorized keys
+  authorized_key:
+    user: "{{ ansible_user_id }}"
+    state: present
+    key: "{{ lookup('file', item) }}"
+  with_fileglob: "{{ secure_ssh_authorized_keys_location }}"
+
+- block:
+  - name: Harden the SSH service with a secure configuration
+    lineinfile:
+      dest: '/etc/ssh/sshd_config'
+      state: present
+      regexp: "{{ item.regexp }}"
+      insertafter: "{{ item.insertafter }}"
+      line: "{{ item.line }}"
+      validate: /usr/sbin/sshd -t -f %s
+      backup: true
+    with_items:
+      - { regexp: '^PermitRootLogin ', insertafter: '^#PermitRootLogin ', line: 'PermitRootLogin no' }
+      - { regexp: '^PasswordAuthentication ', insertafter: '^#PasswordAuthentication ', line: 'PasswordAuthentication no' }
+    notify: "SSH service restart for security"
+  become: true

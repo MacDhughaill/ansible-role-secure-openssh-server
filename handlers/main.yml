@@ -1,6 +1,6 @@
 ---
-- name: SSH daemon restart for security
-  service:
+- name: SSH service restart for security
+  systemd:
     name: sshd
     state: restarted
   become: true
